@@ -1,0 +1,298 @@
+---
+---
+
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/literal-favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Literal</title>
+	</head>
+	<body>
+		<canvas id="draw-canvas"></canvas>
+
+		<main class="content">
+			<img src="/img/literal-logo.svg" alt="Literal" class="image-placeholder" />
+			<p class="tagline">
+				ESTAMOS DIBUJANDO LOS PRÓXIMOS PASOS,<br />
+				DIBUJA TU LOS TUYOS
+			</p>
+		</main>
+
+		<footer class="footer">
+			<a
+				class="instagram"
+				href="https://www.instagram.com/literal_____/"
+				target="_blank"
+				rel="noopener noreferrer">[INSTAGRAM]</a
+			>
+			<button id="clear-btn" class="clear-btn" type="button">CLEAR</button>
+		</footer>
+
+		<style>
+			@font-face {
+				font-family: "Outfit";
+				src: url("/fonts/Outfit-Thin.ttf") format("truetype");
+				font-weight: 100;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Outfit";
+				src: url("/fonts/Outfit-ExtraLight.ttf") format("truetype");
+				font-weight: 200;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Outfit";
+				src: url("/fonts/Outfit-Light.ttf") format("truetype");
+				font-weight: 300;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Outfit";
+				src: url("/fonts/Outfit-Regular.ttf") format("truetype");
+				font-weight: 400;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Outfit";
+				src: url("/fonts/Outfit-Medium.ttf") format("truetype");
+				font-weight: 500;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Outfit";
+				src: url("/fonts/Outfit-SemiBold.ttf") format("truetype");
+				font-weight: 600;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Outfit";
+				src: url("/fonts/Outfit-Bold.ttf") format("truetype");
+				font-weight: 700;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Outfit";
+				src: url("/fonts/Outfit-ExtraBold.ttf") format("truetype");
+				font-weight: 800;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Outfit";
+				src: url("/fonts/Outfit-Black.ttf") format("truetype");
+				font-weight: 900;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			:global(html, body) {
+				margin: 0;
+				padding: 0;
+				height: 100%;
+				overflow: hidden;
+				background: #ffffff;
+				font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+				--text-size: 1rem;
+			}
+
+			#draw-canvas {
+				position: fixed;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				cursor: crosshair;
+				touch-action: none;
+				z-index: 2;
+			}
+
+			.content {
+				position: fixed;
+				inset: 0;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				gap: 8px;
+				pointer-events: none;
+			}
+
+			@keyframes persiana-reveal {
+				from {
+					clip-path: inset(0 0 100% 0);
+					transform: translateY(-12px);
+				}
+				to {
+					clip-path: inset(0 0 0% 0);
+					transform: translateY(0);
+				}
+			}
+
+			.image-placeholder {
+				width: 55%;
+				max-width: 60vw;
+				max-height: 30vh;
+			}
+
+			.tagline {
+				margin: 0;
+				font-size: var(--text-size);
+				font-weight: 400;
+				line-height: 1;
+				animation: persiana-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+				animation-delay: 2s;
+			}
+
+			@media (min-width: 768px) {
+				:global(html, body) {
+					--text-size: 1.6rem;
+				}
+
+				.image-placeholder {
+					width: 27%;
+					max-width: 60vw;
+					max-height: 30vh;
+				}
+			}
+
+			.footer {
+				position: fixed;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 1rem;
+				pointer-events: none;
+				z-index: 3;
+			}
+
+			.instagram,
+			.clear-btn {
+				pointer-events: auto;
+				font-size: var(--text-size);
+				letter-spacing: 0.02em;
+				text-transform: uppercase;
+				color: #000;
+				animation: persiana-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+			}
+
+			.instagram {
+				font-family: inherit;
+				text-decoration: none;
+				animation-delay: 3s;
+			}
+
+			.clear-btn {
+				background: none;
+				border: none;
+				font-family: inherit;
+				cursor: pointer;
+				padding: 0;
+				animation-delay: 3.15s;
+			}
+		</style>
+
+		<script>
+			const canvas = document.getElementById("draw-canvas") as HTMLCanvasElement;
+			const ctx = canvas.getContext("2d")!;
+			const clearBtn = document.getElementById("clear-btn")!;
+
+			function resize() {
+				const ratio = window.devicePixelRatio || 1;
+				canvas.width = window.innerWidth * ratio;
+				canvas.height = window.innerHeight * ratio;
+				canvas.style.width = window.innerWidth + "px";
+				canvas.style.height = window.innerHeight + "px";
+				ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+				ctx.lineCap = "round";
+				ctx.lineJoin = "round";
+				ctx.strokeStyle = "#1F9CD7";
+				ctx.lineWidth = 8;
+				ctx.shadowColor = "#1F9CD7";
+				ctx.shadowBlur = 6;
+			}
+
+			window.addEventListener("resize", resize);
+			resize();
+
+			let drawing = false;
+			let points: { x: number; y: number }[] = [];
+
+			function getPos(e: MouseEvent | TouchEvent) {
+				const rect = canvas.getBoundingClientRect();
+				if ("touches" in e && e.touches[0]) {
+					return {
+						x: e.touches[0].clientX - rect.left,
+						y: e.touches[0].clientY - rect.top,
+					};
+				}
+				const me = e as MouseEvent;
+				return { x: me.clientX - rect.left, y: me.clientY - rect.top };
+			}
+
+			function midpoint(a: { x: number; y: number }, b: { x: number; y: number }) {
+				return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+			}
+
+			function start(e: MouseEvent | TouchEvent) {
+				drawing = true;
+				points = [getPos(e)];
+			}
+
+			function move(e: MouseEvent | TouchEvent) {
+				if (!drawing) return;
+				e.preventDefault();
+				points.push(getPos(e));
+
+				if (points.length > 2) {
+					const [a, b, c] = points.slice(-3);
+					const start = midpoint(a, b);
+					const end = midpoint(b, c);
+					ctx.beginPath();
+					ctx.moveTo(start.x, start.y);
+					ctx.quadraticCurveTo(b.x, b.y, end.x, end.y);
+					ctx.stroke();
+				}
+			}
+
+			function end() {
+				drawing = false;
+			}
+
+			canvas.addEventListener("mousedown", start);
+			canvas.addEventListener("mousemove", move);
+			window.addEventListener("mouseup", end);
+
+			canvas.addEventListener("touchstart", start, { passive: false });
+			canvas.addEventListener("touchmove", move, { passive: false });
+			window.addEventListener("touchend", end);
+
+			clearBtn.addEventListener("click", () => {
+				ctx.save();
+				ctx.setTransform(1, 0, 0, 1, 0, 0);
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.restore();
+			});
+		</script>
+	</body>
+</html>
